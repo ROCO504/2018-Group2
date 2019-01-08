@@ -1,0 +1,42 @@
+/*    Arduino Long Range Wireless Communication using HC-12
+                      Example 01
+   by Dejan Nedelkovski, www.HowToMechatronics.com
+*/
+#include <SoftwareSerial.h>
+#include <Servo.h>
+
+SoftwareSerial HC12(10, 11); // HC-12 TX Pin, HC-12 RX Pin
+Servo myservo;  // create servo object to control a servo
+
+int pos = 0;    // variable to store the servo position
+
+String inString = "";
+
+void setup() {
+  Serial.begin(9600);             // Serial port to computer
+  HC12.begin(9600);               // Serial port to HC12
+  pinMode(LED_BUILTIN, OUTPUT);
+  
+  myservo.attach(3);  // attaches the servo on pin 9 to the servo object
+  
+  digitalWrite(LED_BUILTIN, HIGH);
+}
+void loop() {
+  while (HC12.available()) {        // If HC-12 has data
+    int incomingByte = HC12.read();
+    
+    if (isDigit(incomingByte)) {
+      // convert the incoming byte to a char and add it to the string:
+      inString += (char)incomingByte;
+    }
+    
+    // if you get a newline, print the string, then the string's value:
+    if (incomingByte == '\n') {
+      pos = inString.toInt();
+      myservo.write(pos);
+      delay(15);
+
+      inString = "";
+    }
+  }
+}
